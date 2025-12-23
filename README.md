@@ -13,15 +13,15 @@ A high-performance C++ hash table that beats state-of-the-art at scale using gro
 | **1M** | 72.3 ms | **71.9 ms** | **GroupedSIMD** |
 | **2M** | 157.4 ms | **156.3 ms** | **GroupedSIMD** |
 
-**Operation breakdown at 1M elements:**
+**Operation breakdown at 1M elements (80% load):**
 
 | Operation | ankerl | GroupedSIMD | Speedup |
 |-----------|--------|-------------|---------|
-| Insert | 59.2 ms | 57.5 ms | 1.03x |
-| Lookup Hit | 6.95 ms | 4.61 ms | **1.51x** |
-| Lookup Miss | 4.36 ms | 2.73 ms | **1.60x** |
+| Insert | 50.8 ms | 70.1 ms | 0.72x |
+| Lookup Hit | 104 ms | 61.5 ms | **1.69x** |
+| Lookup Miss | 5.4 ms | 4.5 ms | **1.21x** |
 
-**Use this when:** Table size > 500k elements, lookup-heavy workloads.
+**Use this when:** Table size > 500k elements, lookup-heavy workloads. Insert overhead (0.72x) is acceptable when lookups dominate.
 
 ## Usage
 
@@ -145,12 +145,27 @@ This implementation emerged from exploring the February 2025 "Elastic Hashing" p
 
 **Key insight:** SIMD requires contiguous memory access. Quadratic probing scatters accesses, defeating SIMD. Grouped probing (Swiss Tables' approach) solves this.
 
-## Limitations
+## Limitations & Trade-offs
 
-- No deletion support (yet)
-- No dynamic resizing (fixed capacity)
-- Loses to Robin Hood at small sizes (<500k)
-- Requires SSE2 (no ARM NEON version)
+| Trade-off | Impact | Notes |
+|-----------|--------|-------|
+| Insert overhead | 0.72x vs ankerl | Non-greedy candidate collection |
+| Small tables | Loses below 500k | Crossover at ~500k-1M elements |
+| No deletion | Not implemented | Planned for future |
+| No resizing | Fixed capacity | Must pre-size |
+| SSE2 only | x86-64 only | No ARM NEON version |
+
+### Technical: Why Quadratic Group Jumps?
+
+Groups use **quadratic jumps** to avoid clustering:
+```
+Group 0: h + 16×0² = h
+Group 1: h + 16×1² = h+16
+Group 2: h + 16×2² = h+64
+Group 3: h + 16×3² = h+144
+```
+
+Linear jumps (h, h+16, h+32...) caused **42% insert failure rate** due to probe sequence overlap. Quadratic jumps spread groups across the table, ensuring all slots are reachable.
 
 ## Files
 
