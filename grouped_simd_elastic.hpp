@@ -82,7 +82,7 @@ private:
     // We sacrifice perfect quadratic distribution for safety and simplicity
     size_t group_base(uint64_t h, size_t group_idx) const {
         // Group j starts at: h + GROUP_SIZE * j
-        return (h + GROUP_SIZE * group_idx) % capacity_;
+        return (h + GROUP_SIZE * group_idx * group_idx) % capacity_;
     }
 
     // Get slot index within a group (handles wraparound)
@@ -91,11 +91,13 @@ private:
     }
 
     // Count how many groups we need to check
+    // Count how many groups we need to check
+    // FIXED: Need enough groups to cover the table at high loads
     size_t max_groups() const {
-        size_t max_g = (max_probe_limit_ + GROUP_SIZE - 1) / GROUP_SIZE;
-        // Make sure we don't go beyond capacity
+        // Use C * log(1/delta) GROUPS (not individual probes)
+        size_t recommended = static_cast<size_t>(C * std::log2(1.0 / delta_) * 4) + 8;
         size_t max_possible = (capacity_ + GROUP_SIZE - 1) / GROUP_SIZE;
-        return (max_g < max_possible) ? max_g : max_possible;
+        return (recommended < max_possible) ? recommended : max_possible;
     }
 
 public:
