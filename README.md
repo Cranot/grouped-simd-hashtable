@@ -171,3 +171,11 @@ MIT
 - [Swiss Tables](https://abseil.io/about/design/swisstables) (Google) - The grouped probing insight
 - [ankerl::unordered_dense](https://github.com/martinus/unordered_dense) - SOTA benchmark baseline
 - [Elastic Hashing paper](https://arxiv.org/abs/2501.02305) - Theoretical foundation
+
+---
+
+<p align="center">
+  <b>Grouped SIMD Hash Table</b> - SOTA hashing at scale<br>
+  Made by <a href="https://github.com/Cranot">Dimitris Mitsos</a> & <a href="https://agentskb.com">AgentsKB.com</a><br>
+  Using <a href="https://github.com/Cranot/deep-research">Deep Research</a>
+</p>
