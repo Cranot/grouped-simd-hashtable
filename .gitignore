@@ -1,0 +1,21 @@
+# Executables
+*.exe
+*.out
+
+# Object files
+*.o
+*.obj
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build directories
+build/
+cmake-build-*/
